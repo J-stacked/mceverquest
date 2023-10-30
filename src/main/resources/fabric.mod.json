@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "mceverquest",
+  "version": "${version}",
+  "name": "Minecraft EverQuest",
+  "description": "Brings EverQuest mobs to Minecraft",
+  "authors": ["Joey Hoffmann, Andrew Miller, Zach Miller"],
+  "contact": {
+    "repo": "https://github.com/Josep/mceverquest"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/Mceverquest/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "mceq.mceverquest.Mceverquest"
+    ],
+    "client": [
+      "mceq.mceverquest.client.MceverquestClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
