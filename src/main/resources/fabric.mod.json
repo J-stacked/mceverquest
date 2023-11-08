@@ -16,13 +16,13 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-          "net.mceq.mceverquest.TutorialMod"
+			"net.mceq.mceverquest.MCEverQuest"
 		],
 		"client": [
-          "net.mceq.mceverquest.TutorialModClient"
+			"net.mceq.mceverquest.MCEverQuestClient"
 		],
 		"fabric-datagen": [
-          "net.mceq.mceverquest.TutorialModDataGenerator"
+			"net.mceq.mceverquest.MCEverQuestDataGenerator"
 		]
 	},
 	"depends": {

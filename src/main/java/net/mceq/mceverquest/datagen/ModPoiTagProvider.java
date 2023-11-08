@@ -1,6 +1,6 @@
 package net.mceq.mceverquest.datagen;
 
-import net.mceq.mceverquest.TutorialMod;
+import net.mceq.mceverquest.MCEverQuest;
 import net.minecraft.data.DataOutput;
 import net.minecraft.data.server.tag.TagProvider;
 import net.minecraft.registry.RegistryKeys;
@@ -20,6 +20,6 @@ public class ModPoiTagProvider extends TagProvider<PointOfInterestType> {
     @Override
     protected void configure(RegistryWrapper.WrapperLookup lookup) {
         this.getOrCreateTagBuilder(PointOfInterestTypeTags.ACQUIRABLE_JOB_SITE)
-                .addOptional(new Identifier(TutorialMod.MOD_ID, "soundpoi"));
+                .addOptional(new Identifier(MCEverQuest.MOD_ID, "soundpoi"));
     }
 }
