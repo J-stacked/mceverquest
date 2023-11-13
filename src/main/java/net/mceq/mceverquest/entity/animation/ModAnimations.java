@@ -7,6 +7,7 @@ import net.minecraft.client.render.entity.animation.Transformation;
 
 public class ModAnimations {
 
+    //region < Rat animations >
     public static final Animation RAT_RUN = Animation.Builder.create(0.5f).looping()
             .addBoneAnimation("head",
                     new Transformation(Transformation.Targets.ROTATE,
@@ -67,5 +68,8 @@ public class ModAnimations {
                                     Transformation.Interpolations.LINEAR),
                             new Keyframe(1f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
                                     Transformation.Interpolations.LINEAR))).build();
+    //endregion
+
+    //add new animations here!
 
 }
