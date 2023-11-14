@@ -6,7 +6,6 @@ import net.minecraft.client.model.*;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.SinglePartEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.MathHelper;
 
 public class RatModel<T extends RatEntity> extends SinglePartEntityModel<T> {
 	private final ModelPart rat;
@@ -212,7 +211,7 @@ public class RatModel<T extends RatEntity> extends SinglePartEntityModel<T> {
 	}
 
 	@Override
-	public void setAngles(RatEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void setAngles(RatEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {  //required
 		this.getPart().traverse().forEach(ModelPart::resetTransform);
 
 		this.animateMovement(ModAnimations.RAT_RUN, limbSwing, limbSwingAmount, 2f, 2.5f);
@@ -228,5 +227,5 @@ public class RatModel<T extends RatEntity> extends SinglePartEntityModel<T> {
 	@Override
 	public ModelPart getPart() {
 		return rat;
-	}
+	}  //required
 }
