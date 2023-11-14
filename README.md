@@ -180,28 +180,213 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
 >
 > ![image](https://github.com/J-stacked/mceverquest/assets/146044161/5fffd414-524d-4a10-be49-1a05a6150285)
 
-- Typically you will want an idle animation, a walking animation, and an attack animation.  More or less can be added as needed.  For example, the rat only has a walking and idle animation, since attacking is done by more or less ramming into the player, which can be handled by the code pretty easily.
+- Typically you will want an idle animation, a walking animation, and an attack animation.  More or less can be added as needed.  For example, the rat only has a walking and idle animation, since attacking is done by more or less ramming into the player, which can be handled by the code pretty easily.  This fire elemental will have four animations: walking, idle, melee attack, and fire attack.
 
 </details>
 
 ## Files to add/edit in Fabric mod
 ### Texture
 #### add resources/assets/mceverquest/textures/entity/_YourMob_.png
+<details>
+ <summary>Exporting Texture</summary>
+ 
+- In Blockbench, right click your texture file on the left hand side of the screen and hit _Save As_
 
-### Code
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/4074f438-a1d5-42b3-b10d-fa039542b836)
+
+- Save this somewhere convenient for you to access
+- Open this project in IntelliJ IDEA
+- Drag the file from your file explorer on to _resources>assets>mceverquest>textures>entity_
+
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/0967d19b-54bd-4062-bf04-8dc9285ab590)
+
+- Hit the refactor button to add it to the project!
+
+</details>
+
+### Animation
+#### edit net/mceq/mceverquest/entity/animation/ModAnimations.java
+<details>
+ <summary>Exporting Animations</summary>
+
+- In Blockbench, hit _File>Export>Export Animations to Java_.
+
+> IMPORTANT
+>
+> Use Yarn mappings when saving
+
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/6dc11778-c510-41c9-abe0-46ab2c2d4bc8)
+
+- While this project workspace is open in IntelliJ IDEA, open the resulting file from exporting the animations with IntelliJ IDEA but do not refactor the project to include this file.
+- Copy all the contents of the newly exported animations text file.
+- Make a new code region at the bottom of _net/mceq/mceverquest/entity/animation/ModAnimations.java_
+
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/2d2a5eec-ddbe-4b69-bf47-270f2efd5af2)
+
+- Paste your animation code!
+- Close out of the animation text file you had opened, you will not need it anymore.
+ 
+</details>
+
+### Model
 #### add net/mceq/mceverquest/entity/client/_YourMob_ Model.java
+<details>
+ <summary>Exporting Model</summary>
 
+- In Blockbench, hit _File>Export>Export Java Entity_
+- Export this somewhere convenient and label it similarly to _FireelementalModel_
+
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/06e3d1b2-0bcd-4d0e-b060-19c3ff377933)
+
+</details>
+<details>
+ <summary>Programming Model</summary>
+ 
+- Open the exported model file in IntelliJ, but do not refactor the project to include it.  We will use this file in a couple of steps.
+- Create a new Java class under _net/mceq/mceverquest/entity/client/_ by right clicking the folder and hitting _New>Java Class_.  Name this similarly to _FireelementalModel_
+- Create imports as follows:
+
+```java
+
+import net.mceq.mceverquest.entity.animation.ModAnimations;
+import net.mceq.mceverquest.entity.custom.FireelementalEntity;  //this does not exist yet, but it will later!
+import net.minecraft.client.model.*;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.entity.model.SinglePartEntityModel;
+import net.minecraft.client.util.math.MatrixStack;
+
+```
+
+- Change the class declaration similar to the code below.  It will throw an error until FireelementalEntity is implemented, but we will do that later.  This change of the model class allows us to inherit from already implemented code for _SinglePartEntityModel_ and inherit our not-yet-cerated code for _FireelementalEntity_ (or whatever your mob entity class will be named)
+
+```java
+
+public class FireelementalModel<T extends FireelementalEntity> extends SinglePartEntityModel<T> {
+
+}
+
+```
+
+
+- Within the public class, add the following code in order to declare each body part.  Be sure to use names that you used in Blockbench for each body part and to declare each of them.
+
+```java
+
+private final ModelPart fireelemental;
+private final ModelPart head;
+private final ModelPart body;
+private final ModelPart leftarm;
+private final ModelPart rightarm;
+private final ModelPart flame;
+
+```
+
+- Add the following code to create the class constructor, modifying it to cater to your mob's attributes
+
+```java
+
+public FireelementalModel(ModelPart root) {
+   this.fireelemental = root.getChild("fireelemental");
+   this.head = fireelemental.getChild("head");
+   this.body = fireelemental.getChild("body");
+   this.rightarm = fireelemental.getChild("rightarm");
+   this.leftarm = fireelemental.getChild("leftarm");
+   this.flame = fireelemental.getChild("flame");
+}
+
+```
+
+- Next, you will add the model itself.  Copy and paste the _public static TexturedModelData getTexturedModelData()_ method from your exported model file into your newly created model file.  It should look similar to the code below.
+
+```java
+
+public static TexturedModelData getTexturedModelData() {
+  ModelData modelData = new ModelData();
+  ModelPartData modelPartData = modelData.getRoot();
+  ModelPartData fireelemental = modelPartData.addChild("fireelemental", ModelPartBuilder.create(), ModelTransform.of(0.0F, 8.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
+
+  //your model data goes here
+}
+
+```
+
+- After that, we will implement two required override methods for inheriting _SinglePartEntityModel_
+- The first required method will be _setAngles_, similar to what is shown below.  This allows us to set our different animations for our mob.
+
+```java
+
+@Override
+public void setAngles(RatEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {  //required
+    this.getPart().traverse().forEach(ModelPart::resetTransform);
+
+    this.animateMovement(ModAnimations.FIREELEMENTAL_WALKING, limbSwing, limbSwingAmount, 2f, 2.5f);
+    this.updateAnimation(entity.idleAnimationState, ModAnimations.FIREELEMENTAL_IDLE, ageInTicks, 1f);
+}
+
+```
+
+- The second required method will be _getPart()_.  This is straightforward and will be similar to the code below.
+
+```java
+
+@Override
+public ModelPart getPart() {
+    return fireelemental;
+}
+
+```
+
+- Next, we will implement our renderer.  This is another override function, though not required by our inherited class.  Definitely include it, though!  Otherwise, you may have a bit of trouble rendering...
+
+```java
+@Override
+public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+    fireelemental.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+}
+```
+
+</details>
+
+### Programming Entity 
 #### add net/mceq/mceverquest/entity/custom/_YourMob_ Entity.java
+<details>
+ <summary>Adding Entity</summary>
+
+ 
+</details>
 
 #### add net/mceq/mceverquest/entity/client/_YourMob_ Renderer.java
+<details>
+ <summary>Adding Renderer</summary>
 
-#### edit net/mceq/mceverquest/entity/animation/ModAnimations.java
+ 
+</details>
 
 #### edit net/mceq/mceverquest/entity/ModEntities.java
+<details>
+ <summary>Adding Entity to list of Entities</summary>
+
+ 
+</details>
 
 #### edit net/mceq/mceverquest/entity/client/ModModelLayers.java
+<details>
+ <summary>Adding Model Texture layer</summary>
+
+ 
+</details>
 
 #### edit net/mceq/mceverquest/MCEverQuest.java
+<details>
+ <summary>Initializing Mob Properties</summary>
+
+ 
+</details>
 
 #### edit net/mceq/mceverquest/MCEverQuestClient.java
+<details>
+ <summary>Initializing Mob for Client</summary>
+
+ 
+</details>
 
