@@ -192,6 +192,10 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
  
 - In Blockbench, right click your texture file on the left hand side of the screen and hit _Save As_
 
+> **NOTE**
+>
+> This texture file should be saved with NO uppercase letters.  If there are upper case letters, you will get a runtime error later on.
+
 ![image](https://github.com/J-stacked/mceverquest/assets/146044161/4074f438-a1d5-42b3-b10d-fa039542b836)
 
 - Save this somewhere convenient for you to access
@@ -316,7 +320,7 @@ public static TexturedModelData getTexturedModelData() {
 ```java
 
 @Override
-public void setAngles(RatEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {  //required
+public void setAngles(FireelementalEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {  //required
     this.getPart().traverse().forEach(ModelPart::resetTransform);
 
     this.animateMovement(ModAnimations.FIREELEMENTAL_WALKING, limbSwing, limbSwingAmount, 2f, 2.5f);
@@ -345,27 +349,259 @@ public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int ligh
 }
 ```
 
+- That's it for the model file!
+
 </details>
 
 ### Programming Entity 
 #### add net/mceq/mceverquest/entity/custom/_YourMob_ Entity.java
 <details>
  <summary>Adding Entity</summary>
-
  
+- Add a new Java class by right clicking _net/mceq/mceverquest/entity/custom/_ and hitting _New>Java Class_.  Name this similarly to _FireelementalEntity_.
+- Add at least the following imports for now, though you will probably need to add more depending on the behavior of your mob.
+
+```java
+
+import net.minecraft.entity.AnimationState;
+import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
+
+```
+
+- In order to have hostile mob behavior, we will make the class inherit HostileEntity.  If you wish to make a non-hostile entity, this will change of course.  However, much of the following code will also change.
+
+```java
+
+public class FireelementalEntity extends HostileEntity
+
+```
+
+- Within the class, we will declare a _public final idleAnimationState_ and a _private int idleAnimationTimeout_.  _idleAnimationState_ will be used both in this file and for what we already programmed in _FireelementalModel_.  We will declare them as follows.
+
+```java
+
+public final AnimationState idleAnimationState = new AnimationState();
+private int idleAnimationTimeout = 0;
+
+```
+
+- Next, we will create a default constructor to match one needed from inheriting _HostileEntity_.
+
+```java
+
+public FireelementalEntity(EntityType<? extends HostileEntity> entityType, World world) {
+  super(entityType, world);
+}
+
+```
+
+- We will now create a method to setup animation states for our idle animation.  It will likely look similar to the method implemented below.
+
+```java
+
+private void setupAnimationStates() {
+    if (this.idleAnimationTimeout <= 0) {
+        this.idleAnimationTimeout = this.random.nextInt(40) + 80;
+        this.idleAnimationState.start(this.age);
+    } else {
+        --this.idleAnimationTimeout;
+    }
+}
+
+```
+
+- Next, let's set up some attributes for our mob.  This will be called on mod initialization later.  There are many other attributes that can be addded as well under _EntityAttributes_.
+
+```java
+
+public static DefaultAttributeContainer.Builder createFireelementalAttributes() {
+    return MobEntity.createMobAttributes()
+            .add(EntityAttributes.GENERIC_MAX_HEALTH, 20)
+            .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3f)
+            .add(EntityAttributes.GENERIC_ARMOR, 0.5f)
+            .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4);
+}
+
+```
+
+- All we have left now are override methods!  Our first will be a method to update the limbs of our mob.  It will look similar to the one shown below.
+
+```java
+
+@Override
+protected void updateLimbs(float posDelta) {
+    float f = this.getPose() == EntityPose.STANDING ? Math.min(posDelta * 6.0f, 1.0f) : 0.0f;
+    this.limbAnimator.updateLimbs(f, 0.2f);
+}
+
+```
+
+- Our next one will be to setup the animation states on the client side.
+
+```java
+
+@Override
+public void tick() {
+    super.tick();
+    if(this.getWorld().isClient()) {
+        setupAnimationStates();
+    }
+}
+
+```
+
+- Next, we will have to setup our goals.  This is obviously highly dependant on the mob you intend to setup.  Our Fire Elemental will look like the one below.  If you wish to view a complete list of goals, click one of the goals (ex. _MeleeAttackGoal_) with your middle mouse button.  It will open up Minecraft's code for the _MeleeAttackGoal_.  Scroll up in that file until you see the class declaration and move your cursor to where it inherits the _Goal_ class.  Hit CTRL+H on your keyboard to view the _Goal_'s class hierarchy.  It will open up a panel on the right side of your screen and display a complete list of all the goals.
+
+```java
+
+    @Override
+    protected void initGoals() {
+        this.goalSelector.add(2, new MeleeAttackGoal(this, 1.2D, false));
+        this.goalSelector.add(3, new WanderAroundFarGoal(this, 0.75f, 1));
+        this.goalSelector.add(4, new LookAroundGoal(this));
+
+        this.targetSelector.add(2, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
+        this.targetSelector.add(3, new ActiveTargetGoal<>(this, BeeEntity.class, true));
+    }
+
+```
+
+- Finally, let's add some sounds!  For fun, our Fire Elemental code will look like this for now.
+
+```java
+
+@Nullable
+@Override
+protected SoundEvent getAmbientSound() {
+    return SoundEvents.ENTITY_BLAZE_AMBIENT;
+}
+
+@Nullable
+@Override
+protected SoundEvent getHurtSound(DamageSource source) {
+    return SoundEvents.ENTITY_VILLAGER_HURT;
+}
+
+@Nullable
+@Override
+protected SoundEvent getDeathSound() {
+    return SoundEvents.ENTITY_VILLAGER_CELEBRATE;
+}
+
+```
+
+- That's all for our basic entity class!
+- Here are some Fire Elemental specifics that I added within this entity class.  They may be useful to reference to get added functionality.  I recommend looking at the default Minecraft mob code to get a true feel for it, though.
+
+
+
 </details>
 
 #### add net/mceq/mceverquest/entity/client/_YourMob_ Renderer.java
 <details>
  <summary>Adding Renderer</summary>
 
- 
+- Add a new Java class by right clicking _net/mceq/mceverquest/entity/client/_ and hitting _New>Java Class_.  Name this similarly to _FireelementalRenderer_.
+- Add the following imports.
+
+```java
+
+import net.mceq.mceverquest.MCEverQuest;
+import net.mceq.mceverquest.entity.custom.FireelementalEntity;  //change this accordingly!
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.render.entity.MobEntityRenderer;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Identifier;
+
+```
+
+- Let's inherit some stuff!  Change your code accordingly.
+
+```java
+
+public class FireelementalRenderer extends MobEntityRenderer<FireelementalEntity, FireelementalModel<FireelementalEntity>>{
+    
+}
+
+```
+
+- Inside the class, let's first grab our texture.
+
+```java
+
+private static final Identifier TEXTURE = new Identifier(MCEverQuest.MOD_ID, "textures/entity/fireelementalTexture.png");
+
+```
+
+- Alright, now to make the constructor.  Our Fire Elemental will look like this.  The 0.6f is the size of our shadow.  The ModModelLayers is not implemented yet, but we will get there later.
+
+```java
+
+public FireelementalRenderer(EntityRendererFactory.Context context) {
+    super(context, new FireelementalModel<>(context.getPart(ModModelLayers.FIREELEMENTAL)), 0.6f);
+}
+
+```
+
+- Next, let's implement a method to allow our texture to be grabbed.
+
+```java
+
+@Override
+public Identifier getTexture(FireelementalEntity entity) {
+    return TEXTURE;
+}
+
+```
+
+- Finally, let's implement our _render_ method.
+
+```java
+
+@Override
+public void render(FireelementalEntity mobEntity, float f, float g, MatrixStack matrixStack,
+                   VertexConsumerProvider vertexConsumerProvider, int i) {
+
+    super.render(mobEntity, f, g, matrixStack, vertexConsumerProvider, i);
+}
+
+```
+
+- We are now done with this class!  All easy work from here on out.
+
 </details>
 
 #### edit net/mceq/mceverquest/entity/ModEntities.java
 <details>
  <summary>Adding Entity to list of Entities</summary>
 
+- Open _net/mceq/mceverquest/entity/ModEntities.java_.
+- Add _import net.mceq.mceverquest.entity.custom.FireelementalEntity;_ to your import list at the top (change the name, of course!)
+- Add the following code within the class _ModEntities_:
+
+```java
+
+public static final EntityType<FireelementalEntity> FIREELEMENTAL = Registry.register(Registries.ENTITY_TYPE,
+        new Identifier(MCEverQuest.MOD_ID, "fireelemental"),
+        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, FireelementalEntity::new)
+                .dimensions(EntityDimensions.fixed(1f, 2f)).build());
+
+```
+
+- Of course, change this to match your created mob.  The _SpawnGroup_ code determines in what group your monster will spawn.  In this case, we want a _MONSTER_.  EntityDimensions determine the width and height, respectively, of your mob.
  
 </details>
 
@@ -373,6 +609,15 @@ public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int ligh
 <details>
  <summary>Adding Model Texture layer</summary>
 
+- Open _net/mceq/mceverquest/entity/client/ModModelLayers.java_.
+- At the end of the class _ModModelLayers_, add the following code (adjusted to suit your mob):
+
+```java
+
+public static final EntityModelLayer FIREELEMENTAL =
+        new EntityModelLayer(new Identifier(MCEverQuest.MOD_ID, "fireelemental"), "main");
+
+```
  
 </details>
 
@@ -380,6 +625,13 @@ public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int ligh
 <details>
  <summary>Initializing Mob Properties</summary>
 
+- Open _net/mceq/mceverquest/MCEverQuest.java_.  Within the _onInitialize_ method of the _MCEverQuest_ class, add the following code adjusted to suit your mob:
+
+```java
+
+FabricDefaultAttributeRegistry.register(ModEntities.FIREELEMENTAL, FireelementalEntity.createFireelementalAttributes());
+
+```
  
 </details>
 
@@ -387,6 +639,16 @@ public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int ligh
 <details>
  <summary>Initializing Mob for Client</summary>
 
+- Open _net/mceq/mceverquest/MCEverQuestClient.java_.  Within the _onInitializeClient_ method of the _MCEverQuestClient_ class, add the following code adjusted to suit your mob:
+
+```java
+
+EntityRendererRegistry.register(ModEntities.FIREELEMENTAL, FireelementalRenderer::new);
+EntityModelLayerRegistry.registerModelLayer(ModModelLayers.FIREELEMENTAL, FireelementalModel::getTexturedModelData);
+
+```
  
 </details>
+
+### Build mod and run client!
 
