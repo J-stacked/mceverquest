@@ -847,10 +847,12 @@ public class FireelementalModel<T extends FireelementalEntity> extends SinglePar
     }
 
     @Override
-    public void setAngles(RatEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setAngles(FireelementalEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         this.getPart().traverse().forEach(ModelPart::resetTransform);
 
         this.animateMovement(ModAnimations.FIREELEMENTAL_WALKING, limbSwing, limbSwingAmount, 2f, 2.5f);
+        this.updateAnimation(entity.attackAnimationState, ModAnimations.FIREELEMENTAL_MELEEATTACK, ageInTicks, 1f);
+        this.updateAnimation(entity.fireAttackAnimationState, ModAnimations.FIREELEMENTAL_FIREATTACK, ageInTicks, 1f);
         this.updateAnimation(entity.idleAnimationState, ModAnimations.FIREELEMENTAL_IDLE, ageInTicks, 1f);
     }
 

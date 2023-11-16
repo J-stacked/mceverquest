@@ -7,4 +7,9 @@ import net.minecraft.util.Identifier;
 public class ModModelLayers {
     public static final EntityModelLayer RAT =
             new EntityModelLayer(new Identifier(MCEverQuest.MOD_ID, "rat"), "main");
+
+    public static final EntityModelLayer FIREELEMENTAL =
+            new EntityModelLayer(new Identifier(MCEverQuest.MOD_ID, "fireelemental"), "main");
+
+    //add new here
 }
