@@ -5,6 +5,7 @@ import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -32,6 +33,8 @@ public class FireelementalEntity extends HostileEntity {
     public final AnimationState attackAnimationState = new AnimationState();
     public final AnimationState fireAttackAnimationState = new AnimationState();
     private int idleAnimationTimeout = 0;
+    private int attackAnimationTimeout = 0;
+    private int fireAttackAnimationTimeout = 0;
     private static final TrackedData<Byte> FIREELEMENTAL_FLAGS = DataTracker.registerData(FireelementalEntity.class, TrackedDataHandlerRegistry.BYTE);
 
     public FireelementalEntity(EntityType<? extends HostileEntity> entityType, World world) {
@@ -44,17 +47,25 @@ public class FireelementalEntity extends HostileEntity {
     }
 
     private void setupAnimationStates() {
-        if (this.idleAnimationTimeout <= 0) {
+        if (this.idleAnimationTimeout <= 0) {  //just chillin'
             this.idleAnimationTimeout = this.random.nextInt(40) + 80;
             this.idleAnimationState.start(this.age);
         } else {
             --this.idleAnimationTimeout;
         }
 
-        if(this.isAttacking()){
+        if(this.isAttacking() && this.attackAnimationTimeout <= 0){  //melee attacking the heck out of someone
             this.attackAnimationState.start(this.age);
+            this.attackAnimationTimeout = 25;
         }else{
-            this.attackAnimationState.stop();
+            --this.attackAnimationTimeout;
+        }
+
+        if(this.isFireActive() && this.fireAttackAnimationTimeout <= 0){  //he's on fire and ready to shoot!!
+            this.fireAttackAnimationState.start(this.age);
+            this.fireAttackAnimationTimeout = 60;
+        }else if (this.isFireActive()){
+            --this.fireAttackAnimationTimeout;
         }
     }
 
@@ -87,7 +98,7 @@ public class FireelementalEntity extends HostileEntity {
         }
     }
 
-    @Override
+    @Override  //adds particles and ambient sound
     public void tickMovement() {
         if (this.getWorld().isClient) {
             if (this.random.nextInt(24) == 0 && !this.isSilent()) {
@@ -96,7 +107,7 @@ public class FireelementalEntity extends HostileEntity {
                         this.random.nextFloat() * 0.7f + 0.3f, false);
             }
             for (int i = 0; i < 2; ++i) {
-                this.getWorld().addParticle(ParticleTypes.SMALL_FLAME, this.getParticleX(0.2), this.getRandomBodyY(),
+                this.getWorld().addParticle(ParticleTypes.FLAME, this.getParticleX(0.2), this.getRandomBodyY(),
                         this.getParticleZ(0.2), 0.0, 0.0, 0.0);
             }
         }
@@ -106,6 +117,11 @@ public class FireelementalEntity extends HostileEntity {
     @Override
     public boolean hurtByWater() {
         return true;
+    }
+
+    @Override
+    public boolean isFireImmune() {
+        return false;
     }
 
     @Override
@@ -124,10 +140,9 @@ public class FireelementalEntity extends HostileEntity {
     }
     @Override
     protected void initGoals() {
-        this.goalSelector.add(1, new MeleeAttackGoal(this, 1.2D, false));
-        this.goalSelector.add(1, new ShootFireballGoal(this));
-        this.goalSelector.add(3, new WanderAroundFarGoal(this, 0.75f, 1));
-        this.goalSelector.add(4, new LookAroundGoal(this));
+        this.goalSelector.add(1, new FireelementalAttackGoal(this));
+        this.goalSelector.add(2, new WanderAroundFarGoal(this, 0.75f, 1));
+        this.goalSelector.add(3, new LookAroundGoal(this));
 
         this.targetSelector.add(1, new RevengeGoal(this).setGroupRevenge());
         this.targetSelector.add(2, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
@@ -152,13 +167,14 @@ public class FireelementalEntity extends HostileEntity {
         return SoundEvents.ENTITY_VILLAGER_CELEBRATE;
     }
 
-    static class ShootFireballGoal extends Goal {
+    static class FireelementalAttackGoal extends Goal {
         private final FireelementalEntity fireelemental;
         private int fireballsFired;
         private int fireballCooldown;
         private int targetNotVisibleTicks;
+        private Path path;
 
-        public ShootFireballGoal(FireelementalEntity fireelemental) {
+        public FireelementalAttackGoal(FireelementalEntity fireelemental) {
             this.fireelemental = fireelemental;
             this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK));
         }
@@ -172,13 +188,11 @@ public class FireelementalEntity extends HostileEntity {
         @Override
         public void start() {
             this.fireballsFired = 0;
-            this.fireelemental.fireAttackAnimationState.start(this.fireelemental.age);
         }
 
         @Override
         public void stop() {
             this.fireelemental.setFireActive(false);
-            this.fireelemental.fireAttackAnimationState.stop();
             this.targetNotVisibleTicks = 0;
         }
 
@@ -197,15 +211,30 @@ public class FireelementalEntity extends HostileEntity {
             boolean bl = this.fireelemental.getVisibilityCache().canSee(livingEntity);
             this.targetNotVisibleTicks = bl ? 0 : ++this.targetNotVisibleTicks;
             double d = this.fireelemental.squaredDistanceTo(livingEntity);
+
+            if(fireballCooldown > 0){
+                if(d<1 && this.fireelemental.attackAnimationTimeout <=0) {
+                    this.fireelemental.tryAttack(livingEntity);
+                    this.fireelemental.setAttacking(true);
+                }else if(d<144){
+                    this.path = this.fireelemental.getNavigation().findPathTo(livingEntity, 0);
+                    this.fireelemental.getNavigation().startMovingAlong(this.path, 1.3D);
+                    this.fireelemental.setAttacking(false);
+                }else{
+                    this.fireelemental.setAttacking(false);
+                }
+                return;
+            }
+            this.fireelemental.setAttacking(false);
+
             if (d < 4.0) {
                 if (!bl) {
                     return;
                 }
                 if (this.fireballCooldown <= 0) {
                     this.fireballCooldown = 80;
-                    this.fireelemental.tryAttack(livingEntity);
                 }
-                this.fireelemental.getMoveControl().moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), 1.0);
+                //this.fireelemental.getMoveControl().moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), 1.0);
             } else if (d < this.getFollowRange() * this.getFollowRange() && bl) {
                 double e = livingEntity.getX() - this.fireelemental.getX();
                 double f = livingEntity.getBodyY(0.5) - this.fireelemental.getBodyY(0.5);
