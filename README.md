@@ -882,7 +882,6 @@ static class FireelementalAttackGoal extends Goal {
              if (this.fireballCooldown <= 0) {
                  this.fireballCooldown = 80;
              }
-             //this.fireelemental.getMoveControl().moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), 1.0);
          } else if (d < this.getFollowRange() * this.getFollowRange() && bl) {
              double e = livingEntity.getX() - this.fireelemental.getX();
              double f = livingEntity.getBodyY(0.5) - this.fireelemental.getBodyY(0.5);
