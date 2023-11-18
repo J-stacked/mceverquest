@@ -29,19 +29,21 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
  
 - **Load s3d**
  
- ![image](https://github.com/J-stacked/mceverquest/assets/146044161/df868a62-6725-4a59-abcd-d3675aa9a138)
+ ![image](https://github.com/J-stacked/mceverquest/assets/146044161/d6dfb836-c224-4a01-8eb2-7fe6056c4762)
 
 - **Load Model**
 
- ![image](https://github.com/J-stacked/mceverquest/assets/146044161/ee3d5c33-8aae-4fab-b146-6b4067002850)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/8727be48-bbc7-4f38-bbda-66dd25ceb74b)
+
 
 - **Load Object**
 
- ![image](https://github.com/J-stacked/mceverquest/assets/146044161/f1c31e6d-f4ec-4d74-a3c0-8016c1259f8e)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/9c72b514-29b6-4709-b2ab-a7f3591402ec)
 
 - **Export OBJ**
  
- ![image](https://github.com/J-stacked/mceverquest/assets/146044161/e91cad75-4d45-4dd3-af8d-4bcec8520606)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/10beb3a9-6990-441e-90b3-3a5557dbefce)
+
 
 </details>
 
@@ -51,17 +53,16 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
  
 - **Open file**
  
- ![image](https://github.com/J-stacked/mceverquest/assets/146044161/29a695c0-0471-4e96-8455-9865fdf65366)
-
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/07372262-8df5-4552-bcb7-a5f46d5c2578)
 
 - **Make voxels below 1000 to avoid a Java StackOverflow error**
  
- ![image](https://github.com/J-stacked/mceverquest/assets/146044161/d91280c1-eb76-465a-afed-07498a76199e)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/60bf5f35-8ce4-4cfe-bfde-3e31714a19b3)
 
 
 - **Save as Minecraft (.json)**
  
- ![image](https://github.com/J-stacked/mceverquest/assets/146044161/e605ad02-3463-4eb2-a1af-6863a9d54ef5)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/312f80d5-ef0d-452c-bac9-4fcefd64d3a8)
 
 </details>
 
@@ -75,18 +76,19 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
 #### Import
 - Open .json model in Blockbench
 
- ![image](https://github.com/J-stacked/mceverquest/assets/146044161/591d3115-00c2-404e-879a-d1c3c3868d53)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/7627c240-5421-4323-be6b-77e2a6eb92df)
+
 
 - Convert project (_File > Convert Project_) to "Modded Entity".
 
-  ![image](https://github.com/J-stacked/mceverquest/assets/146044161/981ac7f9-c170-447b-93c5-6b5fd78a5c41)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/4960e9fe-338e-4988-aec8-a399c371abeb)
 
 
 > **IMPORTANT**
 > 
 > Please ensure the project is converted to "Modded Entity".  If not, there will be texturing and animation issues.  Also, in _File > Project..._, ensure the Export Version is set to Fabric 1.17+
 > 
-> ![image](https://github.com/J-stacked/mceverquest/assets/146044161/dab24515-2250-4ff5-b21b-afc90eda6411)
+> ![image](https://github.com/J-stacked/mceverquest/assets/146044161/b184889d-2e08-43f7-be95-c40eddb30741)
 
 > **IMPORTANT**
 > 
@@ -101,19 +103,20 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
 #### Grouping
 - Group cubes as body parts, creating a hierarchy starting with the mob name as the root, then including each limb as a subfolder.  Include the torso (body) as its own part.  This will help when it comes to animating the newly added mob later.
 
- ![image](https://github.com/J-stacked/mceverquest/assets/146044161/45d7a616-6e43-484e-b693-709735c8862f)
+ ![image](https://github.com/J-stacked/mceverquest/assets/146044161/987c084c-a8ca-4e00-b9de-ea0e2a7819e8)
  
 - Add cubes to groups by either individually selecting the voxels or by holding down CTRL and dragging the left mouse button.  Then, right click your selection and add to intended body group.
 
- ![image](https://github.com/J-stacked/mceverquest/assets/146044161/5d86fe59-4ca2-4801-9aa0-42ad5688e486)
- 
+ ![image](https://github.com/J-stacked/mceverquest/assets/146044161/bdab9e67-eae0-4333-90a7-dbacb1022698)
+
 - Repeat until all cubes are consolidated into groups.
   
 > **TIP**
 > 
 > To help with grouping quickly, toggle the visibility of the groups.  This will prevent the cubes from being selected again, as well as hiding them from view.
 >
-> ![image](https://github.com/J-stacked/mceverquest/assets/146044161/0f8b3f36-77db-40a1-bcf5-774bc590b84c)
+> ![image](https://github.com/J-stacked/mceverquest/assets/146044161/16f1afd0-affb-49a6-872b-5c26a92ac697)
+
 
 </details>
 
@@ -123,7 +126,7 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
 #### Texturing
 - The texture will most likely not be able to be found initially, so go ahead and create a texture, then delete the old one.
   
-  ![image](https://github.com/J-stacked/mceverquest/assets/146044161/897fd461-30b0-454e-878b-0ca78e8dc43a)
+  ![image](https://github.com/J-stacked/mceverquest/assets/146044161/4d8f709b-1a48-4bdd-9d89-8b70a2257cb0)
   
 - Each face of a voxel will have a different highlighted area on the texture.  This highlighted area is what section of the texture will map to the face.
 
@@ -135,7 +138,7 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
 
 - Once you are done, you should have a layout similar to this (overlook the absolutely phenomenal texturing for now!):
 
-  ![image](https://github.com/J-stacked/mceverquest/assets/146044161/b785a58e-b67b-4587-82f7-7cb4886284a3)
+  ![image](https://github.com/J-stacked/mceverquest/assets/146044161/d12e2548-c388-41e1-8b92-045df258b70d)
 
 </details>
 
@@ -150,7 +153,7 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
 
 - In the _Edit_ tab, adjust the pivot points of all limbs to somewhere that makes sense for the limb.  Also, you will want to set the pivot point for the mob overall.  Think of the pivot points as where the joints would be on each limb.
 
-![image](https://github.com/J-stacked/mceverquest/assets/146044161/2cfce010-d3fa-4cdd-b5ab-bd9deb71c179)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/06494b26-6d41-4b59-a726-65ad0a1cd67c)
 
 > **TIP**
 >
@@ -158,19 +161,19 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
 
 - Go to the _Animate_ tab in Blockbench
 
-![image](https://github.com/J-stacked/mceverquest/assets/146044161/e97305c1-cafb-43fc-9b6c-5752621e1397)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/a33abb27-c3cc-488d-bb5e-28b18b2651c5)
 
 - Create an animation
 
-![image](https://github.com/J-stacked/mceverquest/assets/146044161/797e29a1-dfcd-40d0-8077-d40dbe09d6fb)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/d403ba30-4ccf-48c3-befb-0b7dce638b60)
 
 - Name the animation and choose whether the animation will be a looping animation (ex. walking) or an animation that will play once (ex. looking around or attacking)
 
-![image](https://github.com/J-stacked/mceverquest/assets/146044161/36d9fdf1-a7e1-4cb4-a347-29b8c0b50e35)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/844b49f6-9e08-498e-b233-26bbd4421c85)
 
 - Add a base position for everything you plan to animate with this animation at 0s.  This way, everything will snap back to normal.
 
-![image](https://github.com/J-stacked/mceverquest/assets/146044161/20a2c67d-362b-4b75-962b-71b62498e147)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/5675e1b0-bd0c-4068-9821-c7023f52353c)
 
 - Add your other positions along the _TIMELINE_
 
@@ -178,7 +181,7 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
 >
 > To preview as it would look in Minecraft, hit the three bars in the upper right corner of the viewport, then go to _Preview Scene_, then select the environment you would like to emulate
 >
-> ![image](https://github.com/J-stacked/mceverquest/assets/146044161/5fffd414-524d-4a10-be49-1a05a6150285)
+> ![image](https://github.com/J-stacked/mceverquest/assets/146044161/cee60a27-ac1d-4c4f-9962-a9bfa44a6c5f)
 
 - Typically you will want an idle animation, a walking animation, and an attack animation.  More or less can be added as needed.  For example, the rat only has a walking and idle animation, since attacking is done by more or less ramming into the player, which can be handled by the code pretty easily.  This fire elemental will have four animations: walking, idle, melee attack, and fire attack.
 
@@ -196,13 +199,13 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
 >
 > This texture file should be saved with NO uppercase letters.  If there are upper case letters, you will get a runtime error later on.
 
-![image](https://github.com/J-stacked/mceverquest/assets/146044161/4074f438-a1d5-42b3-b10d-fa039542b836)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/dcfda869-d0c0-4382-99f5-0c7e64c5a40f)
 
 - Save this somewhere convenient for you to access
 - Open this project in IntelliJ IDEA
 - Drag the file from your file explorer on to _resources>assets>mceverquest>textures>entity_
 
-![image](https://github.com/J-stacked/mceverquest/assets/146044161/0967d19b-54bd-4062-bf04-8dc9285ab590)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/99687e4e-39b0-41b0-88f9-da0deaf9a62c)
 
 - Hit the refactor button to add it to the project!
 
@@ -219,13 +222,14 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
 >
 > Use Yarn mappings when saving
 
-![image](https://github.com/J-stacked/mceverquest/assets/146044161/6dc11778-c510-41c9-abe0-46ab2c2d4bc8)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/ce3d0ef1-d8b0-42d9-a103-0f7f86a2408d)
+
 
 - While this project workspace is open in IntelliJ IDEA, open the resulting file from exporting the animations with IntelliJ IDEA but do not refactor the project to include this file.
 - Copy all the contents of the newly exported animations text file.
 - Make a new code region at the bottom of _net/mceq/mceverquest/entity/animation/ModAnimations.java_
 
-![image](https://github.com/J-stacked/mceverquest/assets/146044161/2d2a5eec-ddbe-4b69-bf47-270f2efd5af2)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/b18a54b0-d925-41e7-8e64-aea964fbc31b)
 
 - Paste your animation code!
 - Close out of the animation text file you had opened, you will not need it anymore.
@@ -240,7 +244,7 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
 - In Blockbench, hit _File>Export>Export Java Entity_
 - Export this somewhere convenient and label it similarly to _FireelementalModel_
 
-![image](https://github.com/J-stacked/mceverquest/assets/146044161/06e3d1b2-0bcd-4d0e-b060-19c3ff377933)
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/e8dbb323-309e-4a89-843e-793f92d491b8)
 
 </details>
 <details>
