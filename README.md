@@ -1,8 +1,4 @@
 MC Everquest!
- 
-## Issues:
-- Z-fighting on models
-- Death message names of entities need fixed
 
 # Modding Guide:
 
