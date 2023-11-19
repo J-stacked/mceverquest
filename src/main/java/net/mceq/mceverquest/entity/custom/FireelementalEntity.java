@@ -121,7 +121,7 @@ public class FireelementalEntity extends HostileEntity {
 
     @Override
     public boolean isFireImmune() {
-        return false;
+        return true;
     }
 
     @Override
