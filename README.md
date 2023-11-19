@@ -944,5 +944,53 @@ public boolean isFireImmune() {
  
 </details>
 
-### Build mod and run client!
+## Using Gradle
+### Generating Minecraft source code
+
+<details>
+<summary> genSources </summary>
+   
+- Before we can run our project or utilize Minecraft methods, we will need to generate the Minecraft source code.  This is done by using Fabric's _genSources_ Gradle task.
+
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/b1a26e6c-c190-4143-8a4c-687c7c71c2e7)
+
+- This will take a little bit, so be patient!
+
+</details>
+
+### Cleaning
+
+<details>
+<summary> clean </summary>
+
+- Sometimes you may need to clean the project before building.  This is done by running the _clean_ task under the build list.
+
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/fc117567-f6c1-4473-9769-38b6f0991183)
+
+</details>
+
+### Building
+
+<details>
+<summary> build </summary>
+
+- To build your project, use the _build_ task.
+
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/c6e7feb1-feeb-4604-9c4d-809a5316382c)
+
+</details>
+
+### Running
+
+<details>
+<summary> runClient </summary>
+
+- To run the Minecraft client with our mod, use the Fabric _runClient_ task. 
+
+![image](https://github.com/J-stacked/mceverquest/assets/146044161/35812681-56be-4626-bf9d-ad71f066e13b)
+
+</details>
+
+
+
 
