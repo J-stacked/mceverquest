@@ -1,8 +1,4 @@
 MC Everquest!
- 
-## Issues:
-- Z-fighting on models
-- Death message names of entities need fixed
 
 # Modding Guide:
 
@@ -507,9 +503,6 @@ protected SoundEvent getDeathSound() {
 ```
 
 - That's all for our basic entity class!
-- Here are some Fire Elemental specifics that I added within this entity class.  They may be useful to reference to get added functionality.  I recommend looking at the default Minecraft mob code to get a true feel for it, though.
-
-
 
 </details>
 
@@ -649,6 +642,303 @@ FabricDefaultAttributeRegistry.register(ModEntities.FIREELEMENTAL, Fireelemental
 
 EntityRendererRegistry.register(ModEntities.FIREELEMENTAL, FireelementalRenderer::new);
 EntityModelLayerRegistry.registerModelLayer(ModModelLayers.FIREELEMENTAL, FireelementalModel::getTexturedModelData);
+
+```
+ 
+</details>
+
+#### Special considerations for the fire elemental
+
+- Here are some Fire Elemental specifics that I added.  They may be useful to reference to get added functionality, though I recommend looking at the default Minecraft mob code to get a true feel for it.
+
+<details>
+ <summary> Adding particles and burn sound </summary>
+
+ - Added some flame particles around the fire elemental entity, as well as random burn sound effects.
+ - This code is within the FireelementalEntity class
+
+```java
+
+@Override  //adds particles and ambient sound
+public void tickMovement() {
+    if (this.getWorld().isClient) {
+        if (this.random.nextInt(24) == 0 && !this.isSilent()) {
+            this.getWorld().playSound(this.getX() + 0.5, this.getY() + 0.5, this.getZ() + 0.5,
+                    SoundEvents.ENTITY_BLAZE_BURN, this.getSoundCategory(), 0.3f + this.random.nextFloat(),
+                    this.random.nextFloat() * 0.7f + 0.3f, false);
+        }
+        for (int i = 0; i < 2; ++i) {
+            this.getWorld().addParticle(ParticleTypes.FLAME, this.getParticleX(0.2), this.getRandomBodyY(),
+                    this.getParticleZ(0.2), 0.0, 0.0, 0.0);
+        }
+    }
+    super.tickMovement();
+}
+
+```
+
+</details>
+
+<details>
+ <summary> Adding a custom goal </summary>
+
+- I added a custom attack goal for the fire elemental.  It will chase you and shoot fireballs at you if it can't reach you.
+
+- This is the extra code in the FireelementalModel class.
+
+```java
+
+public void setAngles(FireelementalEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+
+    ...
+
+    this.updateAnimation(entity.attackAnimationState, ModAnimations.FIREELEMENTAL_MELEEATTACK, ageInTicks, 1f);
+    this.updateAnimation(entity.fireAttackAnimationState, ModAnimations.FIREELEMENTAL_FIREATTACK, ageInTicks, 1f);
+}
+
+```
+
+- This is the extra code within the FireelementalEntity class
+
+```java
+
+//new declarations
+public final AnimationState attackAnimationState = new AnimationState();
+public final AnimationState fireAttackAnimationState = new AnimationState();
+private int attackAnimationTimeout = 0;
+private int fireAttackAnimationTimeout = 0;
+private static final TrackedData<Byte> FIREELEMENTAL_FLAGS = DataTracker.registerData(FireelementalEntity.class, TrackedDataHandlerRegistry.BYTE);
+
+```
+
+```java
+
+//new animation states
+private void setupAnimationStates() {
+    if (this.idleAnimationTimeout <= 0) {
+        this.idleAnimationTimeout = this.random.nextInt(40) + 80;
+        this.idleAnimationState.start(this.age);
+    } else {
+        --this.idleAnimationTimeout;
+    }
+
+    if(this.isAttacking() && this.attackAnimationTimeout <= 0){
+        this.attackAnimationState.start(this.age);
+        this.attackAnimationTimeout = 25;
+    }else{
+        --this.attackAnimationTimeout;
+    }
+
+    if(this.isFireActive() && this.fireAttackAnimationTimeout <= 0){
+        this.fireAttackAnimationState.start(this.age);
+        this.fireAttackAnimationTimeout = 60;
+    }else if (this.isFireActive()){
+        --this.fireAttackAnimationTimeout;
+    }
+}
+
+```
+
+```java
+
+//This tracked flag is for the fire effect when the fire elemental is about to shoot fireballs
+@Override
+protected void initDataTracker() {
+    super.initDataTracker();
+    this.dataTracker.startTracking(FIREELEMENTAL_FLAGS, (byte)0);
+}
+
+```
+
+```java
+
+//adds flame particles and ambient sound
+@Override  
+public void tickMovement() {
+    if (this.getWorld().isClient) {
+        if (this.random.nextInt(24) == 0 && !this.isSilent()) {
+            this.getWorld().playSound(this.getX() + 0.5, this.getY() + 0.5, this.getZ() + 0.5,
+                    SoundEvents.ENTITY_BLAZE_BURN, this.getSoundCategory(), 0.3f + this.random.nextFloat(),
+                    this.random.nextFloat() * 0.7f + 0.3f, false);
+        }
+        for (int i = 0; i < 2; ++i) {
+            this.getWorld().addParticle(ParticleTypes.FLAME, this.getParticleX(0.2), this.getRandomBodyY(),
+                    this.getParticleZ(0.2), 0.0, 0.0, 0.0);
+        }
+    }
+    super.tickMovement();
+}
+
+```
+
+```java
+
+//these methods manage the fire effect on the blaze
+@Override
+public boolean isOnFire() {
+    return this.isFireActive();
+}
+
+private boolean isFireActive() {
+    return (this.dataTracker.get(FIREELEMENTAL_FLAGS) & 1) != 0;
+}
+
+void setFireActive(boolean fireActive) {
+    byte b = this.dataTracker.get(FIREELEMENTAL_FLAGS);
+    b = fireActive ? (byte)(b | 1) : (byte)(b & 0xFFFFFFFE);
+    this.dataTracker.set(FIREELEMENTAL_FLAGS, b);
+}
+
+```
+
+```java
+
+//our new goals
+@Override
+protected void initGoals() {
+    this.goalSelector.add(1, new FireelementalAttackGoal(this));  //NEW!  Our new custom goal
+    this.goalSelector.add(2, new WanderAroundFarGoal(this, 0.75f, 1));
+    this.goalSelector.add(3, new LookAroundGoal(this));
+
+    this.targetSelector.add(1, new RevengeGoal(this).setGroupRevenge());  //NEW!  This adds a revenge goal if another mob hits the fire elemental.
+    this.targetSelector.add(2, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
+    this.targetSelector.add(3, new ActiveTargetGoal<>(this, BeeEntity.class, true));
+}
+
+```
+
+```java
+
+//and finally, our new goal!
+
+static class FireelementalAttackGoal extends Goal {
+     private final FireelementalEntity fireelemental;
+     private int fireballsFired;
+     private int fireballCooldown;
+     private int targetNotVisibleTicks;
+     private Path path;
+
+     public FireelementalAttackGoal(FireelementalEntity fireelemental) {
+         this.fireelemental = fireelemental;
+         this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK));
+     }
+
+     @Override
+     public boolean canStart() {
+         LivingEntity livingEntity = this.fireelemental.getTarget();
+         return livingEntity != null && livingEntity.isAlive() && this.fireelemental.canTarget(livingEntity);
+     }
+
+     @Override
+     public void start() {
+         this.fireballsFired = 0;
+     }
+
+     @Override
+     public void stop() {
+         this.fireelemental.setFireActive(false);
+         this.targetNotVisibleTicks = 0;
+     }
+
+     @Override
+     public boolean shouldRunEveryTick() {
+         return true;
+     }
+
+     @Override
+     public void tick() {
+         --this.fireballCooldown;
+         LivingEntity livingEntity = this.fireelemental.getTarget();
+         if (livingEntity == null) {
+             return;
+         }
+         boolean bl = this.fireelemental.getVisibilityCache().canSee(livingEntity);
+         this.targetNotVisibleTicks = bl ? 0 : ++this.targetNotVisibleTicks;
+         double d = this.fireelemental.squaredDistanceTo(livingEntity);
+
+         if(fireballCooldown > 0){
+             if(d<1 && this.fireelemental.attackAnimationTimeout <=0) {
+                 this.fireelemental.tryAttack(livingEntity);
+                 this.fireelemental.setAttacking(true);
+             }else if(d<144){
+                 this.path = this.fireelemental.getNavigation().findPathTo(livingEntity, 0);
+                 this.fireelemental.getNavigation().startMovingAlong(this.path, 1.3D);
+                 this.fireelemental.setAttacking(false);
+             }else{
+                 this.fireelemental.setAttacking(false);
+             }
+             return;
+         }
+         this.fireelemental.setAttacking(false);
+
+         if (d < 4.0) {
+             if (!bl) {
+                 return;
+             }
+             if (this.fireballCooldown <= 0) {
+                 this.fireballCooldown = 80;
+             }
+         } else if (d < this.getFollowRange() * this.getFollowRange() && bl) {
+             double e = livingEntity.getX() - this.fireelemental.getX();
+             double f = livingEntity.getBodyY(0.5) - this.fireelemental.getBodyY(0.5);
+             double g = livingEntity.getZ() - this.fireelemental.getZ();
+             if (this.fireballCooldown <= 0) {
+                 ++this.fireballsFired;
+                 if (this.fireballsFired == 1) {
+                     this.fireballCooldown = 60;
+                     this.fireelemental.setFireActive(true);
+                 } else if (this.fireballsFired <= 4) {
+                     this.fireballCooldown = 6;
+                 } else {
+                     this.fireballCooldown = 100;
+                     this.fireballsFired = 0;
+                     this.fireelemental.setFireActive(false);
+                 }
+                 if (this.fireballsFired > 1) {
+                     double h = Math.sqrt(Math.sqrt(d)) * 0.5;
+                     if (!this.fireelemental.isSilent()) {
+                         this.fireelemental.getWorld().syncWorldEvent(null, WorldEvents.BLAZE_SHOOTS, this.fireelemental.getBlockPos(), 0);
+                     }
+                     for (int i = 0; i < 1; ++i) {
+                         SmallFireballEntity smallFireballEntity = new SmallFireballEntity(this.fireelemental.getWorld(), this.fireelemental, this.fireelemental.getRandom().nextTriangular(e, 2.297 * h), f, this.fireelemental.getRandom().nextTriangular(g, 2.297 * h));
+                         smallFireballEntity.setPosition(smallFireballEntity.getX(), this.fireelemental.getBodyY(0.5) + 0.5, smallFireballEntity.getZ());
+                         this.fireelemental.getWorld().spawnEntity(smallFireballEntity);
+                     }
+                 }
+             }
+             this.fireelemental.getLookControl().lookAt(livingEntity, 10.0f, 10.0f);
+         } else if (this.targetNotVisibleTicks < 5) {
+             this.fireelemental.getMoveControl().moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), 1.0);
+         }
+         super.tick();
+     }
+
+     private double getFollowRange() {
+         return this.fireelemental.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE);
+     }
+ }
+
+
+```
+ 
+</details>
+
+<details>
+ <summary> Adding special traits </summary>
+
+ - I wanted to make the fire elemental immune to fire and make it hurt by water, so I added the following to the FireelementalEntity class.
+
+```java
+
+@Override
+public boolean hurtByWater() {
+    return true;
+}
+
+@Override
+public boolean isFireImmune() {
+    return true;
+}
 
 ```
  
