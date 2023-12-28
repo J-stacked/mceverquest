@@ -15,12 +15,13 @@ MC Everquest!
    +Animated Java plugin
 3. Online voxelizer (https://drububu.com/miscellaneous/voxelizer/?out=min)
 4. EQModelViewer & ZoneConverter (https://github.com/mixxit/eqemu_zonetools/blob/master/EQModel_Viewer_ZoneConverter.zip)
+5. LanternExtractor (https://www.lanterneq.com/) (https://github.com/LanternEQ/LanternExtractor/wiki)
 
 
 ## Creating usable mob model
-### Step 1: EQModelViewer (skip this step if you already have an .obj of what you want to add)
+### Step 1: Getting Models from Everquest S3D files
 <details>
- <summary>Details</summary>
+ <summary> Option 1 - EQModel Viewer </summary>
 Use the EQModelViewer to extract models from the Everquest S3D files.
  
 - **Load s3d**
@@ -41,6 +42,19 @@ Use the EQModelViewer to extract models from the Everquest S3D files.
 ![image](https://github.com/J-stacked/mceverquest/assets/146044161/10beb3a9-6990-441e-90b3-3a5557dbefce)
 
 
+</details>
+
+<details>
+   <summary> Option 2 - LanternEQ </summary>
+   
+   -  **Edit _settings.txt_** 
+
+   The path to the EverQuest installation will need to be edited.  Also, you will want to change ModelExportFormat to 1 (OBJ).
+
+   - **Run in cmd window**
+
+   Run _./LanternExtractor.exe all_ in the cmd window.  This will take a while.  The exports will be found in the _Exports_ folder once complete.
+   
 </details>
 
 ### Step 2: Voxelizer (or create model from scratch in Blockbench)
